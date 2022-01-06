@@ -116,7 +116,14 @@ let grid_of_string cell_of_char str =
 
 type problem = { initial_grid : int option grid }
 
-let print_problem problem : unit = failwith "TODO"
+(*naš problem(sudoku) želimo z znanimi funkcijami zapisati v obliki grida, potrebujemo pomožno funkcijo 
+da int spremenimo v string in pustimo prazen kvadratek, če int-a ni*)
+let option_of_string a = match a with
+  | None -> ""
+  | Some st -> string_of_int st
+
+let print_problem problem : unit = 
+  print_grid option_of_string problem
 
 let problem_of_string str =
   let cell_of_char = function
@@ -130,6 +137,37 @@ let problem_of_string str =
 
 type solution = int grid
 
-let print_solution solution = failwith "TODO"
+let print_solution solution = print_grid string_of_int solution
 
-let is_valid_solution problem solution = failwith "TODO"
+
+(*funkcija da preverimo če vsebuje vsak array vsa st od 1 do 9*) 
+let sort_list (list : int list) = List.sort compare list
+
+let all_digit (array : 'a array) =
+  let list =  (Array.to_list array) in
+  if sort_list list = [1; 2; 3; 4; 5; 6; 7; 8; 9] then true else false
+
+
+(*funkcija pogleda če je problem res neka podmnožica rešitve*)
+let change_none_to_zero = function
+  |Some x -> x
+  |None -> 0
+
+let problem_with_zero problem = (problem.initial_grid) |> map_grid change_none_to_zero
+let problem_is_solution problem_with_zero (solution : int array array) =
+  let rec problem_is_solution_aux (problem : int array array) (solution : int array array) size_of_grid x y = match (x, y) with    
+    | (8, 8) -> (if problem.(x).(y) = 0 then true else (if problem.(x).(y) = solution.(x).(y) then true else false)) 
+    | (8, _) -> (if problem.(x).(y) = 0 then true else (if problem.(x).(y) = solution.(x).(y) then true else false)) && (problem_is_solution_aux problem solution size_of_grid x (y+1)) 
+    | (i, _) -> (if problem.(x).(y) = 0 then true else (if problem.(x).(y) = solution.(x).(y) then true else false)) && (problem_is_solution_aux problem solution size_of_grid (x+1) y)
+  in
+  problem_is_solution_aux problem_with_zero solution 8 0 0 
+
+
+(*problem, rows solution so list array, potrebujem pomožno fun*)
+let rec all_digit_array_list array_list  = match array_list with
+    | [] -> true
+    | x :: xs -> if all_digit x then all_digit_array_list xs else false
+
+let is_valid_solution problem solution = 
+  all_digit_array_list(rows solution) && all_digit_array_list(columns solution) && all_digit_array_list(boxes solution) && (problem_is_solution problem solution)
+
