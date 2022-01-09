@@ -42,7 +42,8 @@ let () =
 (* Če domačo nalogo rešujete prek spletnega vmesnika, ki ne podpira branja datotek,
    lahko delovanje preizkušate prek spodnjega programa. *)
 
-(*let () = "
+(*
+let () = "
 ┏━━━┯━━━┯━━━┓
 ┃483│921│657┃
 ┃967│3 5│821┃

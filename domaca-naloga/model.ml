@@ -120,6 +120,7 @@ da int spremenimo v string in pustimo prazen kvadratek, če int-a ni*)
 let int_option_to_string = function
   |Some x -> string_of_int x
   |None -> " "
+
 let print_problem (problem:problem) : unit = 
   print_grid int_option_to_string problem.initial_grid
 
@@ -180,36 +181,32 @@ let is_valid_solution (problem:problem) solution =
 
 (*################################################################SOLVER##############################################################################*)
 (*
-type available = { loc : int * int; possible : int list }
-(*tip možnosti*)
+type available = { loc : int * int; possible : int list } 
 
 (* TODO: tip stanja ustrezno popravite, saj boste med reševanjem zaradi učinkovitosti
    želeli imeti še kakšno dodatno informacijo *)
-type state = { problem : problem; current_grid : int option grid;  moznosti : available list }
-(*tip stanja*)
 
-(*print state pri katerem so prazna polja označena z ?*)
+type state = { problem : problem; current_grid : int option grid;  moznosti : available list}
+
+
 let print_state (state : state) : unit =
   print_grid
     (function None -> "?" | Some digit -> string_of_int digit)
     state.current_grid
 
 type response = Solved of solution | Unsolved of state | Fail of state
-(*tip rešitev*)
-
-
 
 (*DODANE FUNKCIJE*)
-let change_none_to_zero = function
+let int_option_to_ind = function
   |Some x -> x
   |None -> 0
 
 let map_list array  = 
-  let rec map_array_aux f list = match list with
-  | [] -> []
-  | x::xs -> (f x) :: map_array_aux f xs
+  let rec map_array_aux f list acc = match list with
+  | [] -> acc
+  | x::xs -> map_array_aux f xs ((f x)::acc)
 in
-  map_array_aux change_none_to_zero (Array.to_list array)
+  map_array_aux int_option_to_ind (Array.to_list array) []
 
 
 let odstevanje_listov list1 list2 = 
@@ -223,10 +220,6 @@ in
 let rec list_without_zero list = match list with
   | [] -> []
   | x::xs -> if (x = 0) then list_without_zero xs else x :: (list_without_zero xs)
-
-let int_option_to_int x = match x with
-  |Some y -> y
-  |_ -> failwith "None"
 
 
 (*dobila bom vsa št ki manjkajo v nekem arrayu, pospravljena v int listu*)
@@ -255,24 +248,44 @@ let manjkajoca_st array = match (List.sort compare (map_list array)) with
     | (6, 3) | (6, 4) | (6, 5) | (7, 3) | (7, 4) | (7, 5) | (8, 3) | (8, 4) | (8, 5) ->  (presek_listov (presek_listov(manjkajoca_st (get_row grid i)) (manjkajoca_st (get_column grid j))) (manjkajoca_st (get_box grid 7))) 
     | (6, 6) | (6, 7) | (6, 8) | (7, 6) | (7, 7) | (7, 8) | (8, 6) | (8, 7) | (8, 8) ->  (presek_listov (presek_listov(manjkajoca_st (get_row grid i)) (manjkajoca_st (get_column grid j))) (manjkajoca_st (get_box grid 8))) 
     | _ -> failwith "ta par ne obstaja"
-
+(* funkcije za initialize_state *)
 
 let urejeni_available_listi (list : available list) =
   let lenght x y = List.length x.possible - List.length y.possible in 
     List.sort lenght list
 
+
+  (*dobili bomo list "parov" urejenih možnosti na nekem indeksu; za hitrejše delovanje jih sortiramo po dolžini*)
 let vse_moznosti grid =
   let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
-    |None -> if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
-      if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
-    |Some x-> if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
-      if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
+    |None -> if (i,j) = (8,8) then ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) 
+      else 
+        if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
+        if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
+    |Some x-> if (i,j) = (8,8) then acc 
+      else 
+        if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
+        if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
   in 
   urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
 
+let validate_state (state : state) : response =
+  let unsolved =
+    Array.exists (Array.exists Option.is_none) state.current_grid
+  in
+  if unsolved then Unsolved state
+  else
+    (* Option.get ne bo sprožil izjeme, ker so vse vrednosti v mreži oblike Some x *)
+    let solution = map_grid Option.get state.current_grid in
+    if is_valid_solution state.problem solution then Solved solution
+    else Fail state
+
 let eno_vrednost grid x (i, j) = 
-  grid.(i).(j) <- Some x;
-  grid
+  let model_grid = copy_grid grid in 
+    model_grid.(i).(j) <- Some x;
+      model_grid
+
+(*funkcija bo rešila le celice kjer je natanko ena možnost*)
 
 let resimo_enostavne (state : state) = 
   let trenuten_grid = copy_grid state.current_grid in 
@@ -288,28 +301,17 @@ in
   let novejsi_grid = aux moznosti trenuten_grid in
   (*napisimo sedaj novo stanje*)
   {current_grid = novejsi_grid ; moznosti = (vse_moznosti novejsi_grid); problem = state.problem}
- 
- 
-let initialize_state (problem : problem) : state =
-  { current_grid = copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem }
 
+let initialize_state (problem : problem) : state =
+  { current_grid = copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem } 
+ 
+(*funkcijo ki resuje enostavne uporabimo tolikokrat da ne rši več nobene celice*)
 let nov_state (state : state) = 
       let rec ponavljamo_dokler_resuje f stanje = 
         if ((f stanje).current_grid = stanje.current_grid) then stanje
         else ponavljamo_dokler_resuje f (f stanje)
       in
       (ponavljamo_dokler_resuje resimo_enostavne state)
-
-let validate_state (state : state) : response =
-  let unsolved =
-    Array.exists (Array.exists Option.is_none) state.current_grid
-  in
-  if unsolved then Unsolved state
-  else
-    (* Option.get ne bo sprožil izjeme, ker so vse vrednosti v mreži oblike Some x *)
-    let solution = map_grid Option.get state.current_grid in
-    if is_valid_solution state.problem solution then Solved solution
-    else Fail state
 
 
 let branch_state (state : state) : (state * state) option =
@@ -334,11 +336,12 @@ let branch_state (state : state) : (state * state) option =
           current_grid = copy_grid state.current_grid;
           moznosti = {possible = ys; loc = (i,j)} :: xs}
           ))
-
+    
 
 (* pogledamo, če trenutno stanje vodi do rešitve *)
 let rec solve_state (state : state) =
   (* uveljavimo trenutne omejitve in pogledamo, kam smo prišli *)
+  (* TODO: na tej točki je stanje smiselno počistiti in zožiti možne rešitve *)
   match validate_state state with
   | Solved solution ->
       (* če smo našli rešitev, končamo *)
@@ -372,7 +375,7 @@ let solve_problem (problem : problem) =
 *)
 
 (*##################################################################KRNEKEJ###################################################################################################*)
-
+(*
 let primer2_neresen = [|
 [|Some 2 ; None ; None ; None ; Some 8 ; None ; Some 3 ; None ;  None |];
 [|None ; Some 6 ; None ; None ; Some 7; None ; None ; Some 8 ; Some 4 |];
@@ -390,6 +393,12 @@ let primer2_state = {
   current_grid = primer2_neresen;
   moznosti = vse_moznosti primer2_neresen
 }*)
+
+let primer2resen_int =  [|[|2; 4; 5; 9; 8; 1; 3; 7; 6|]; [|1; 6; 9; 2; 7; 3; 5; 8; 4|];
+[|8; 3; 7; 5; 6; 4; 2; 1; 9|]; [|9; 7; 6; 1; 2; 5; 4; 3; 8|];
+[|5; 1; 3; 4; 9; 8; 6; 2; 7|]; [|4; 8; 2; 7; 3; 6; 9; 5; 1|];
+[|3; 9; 1; 6; 5; 7; 8; 4; 2|]; [|7; 2; 8; 3; 4; 9; 1; 6; 5|];
+[|6; 5; 4; 8; 1; 2; 7; 9; 3|]|]
 let primer1_neresen_int = 
   [|
     [| 4; 8; 3; 9; 2; 1; 6; 5; 7|];
@@ -439,6 +448,49 @@ let primer1_neresen = [|
 [|Some 3; Some 7; Some 2; Some 6; Some 8; Some 9; Some 5; Some 1;Some 4|];
 [|Some 8; Some 1; Some 4; Some 2; Some 5; Some 3; Some 7; Some 6;Some 9|];
 [|Some 6; Some 9; Some 5; Some 4; Some 1; Some 7; Some 3; Some 8;Some 2|]|]   let primer_1_problem = {initial_grid = primer1_neresen}
- 
+*) 
 
+(*
+let primer_3_neresen = [|
+  [|None;None;Some 1; Some 9; None; None ; None; None ; Some 3|]; 
+[|Some 9; None; None; Some 7; None; None; Some 1; Some 6; None|];
+[|None; Some 3; None; None; None; Some 5; None; None; Some 7|];
+[|None; Some 5; None; None; None; None; None; None; Some 9|];
+[|None; None; Some 4; Some 3; None; Some 2; Some 6; None; None|];
+[|Some 2; None; None; None; None; None; None; Some 7; None|];
+[|Some 6; None; None; Some 1; None; None; None; Some 3; None|];
+[|None; Some 4; Some 2; None; None; Some 7; None; None; Some 6|];
+[|Some 5; None; None; None; None; Some 6; Some 8; None; None|];
+|]
 
+let primer_3_problem ={initial_grid = primer_3_neresen}
+let primer_3_state = {
+  problem = primer_3_problem;
+  current_grid = primer_3_neresen;
+  moznosti = vse_moznosti primer_3_neresen
+}
+
+let primer_3_resen_int = [|
+  [|None;None;Some 1; Some 9; None; None ; None; None ; Some 3|]; 
+[|Some 9; None; None; Some 7; None; None; Some 1; Some 6; None|];
+[|None; Some 3; None; None; None; Some 5; None; None; Some 7|];
+[|None; Some 5; None; None; None; None; None; None; Some 9|];
+[|None; None; Some 4; Some 3; None; Some 2; Some 6; None; None|];
+[|Some 2; None; None; None; None; None; None; Some 7; None|];
+[|Some 6; None; None; Some 1; None; None; None; Some 3; None|];
+[|None; Some 4; Some 2; None; None; Some 7; None; None; Some 6|];
+[|Some 5; None; None; None; None; Some 6; Some 8; None; None|];
+|]
+
+let primer_3_solution = [|
+  [|7;6;1;9;2;8;4;5;3|];
+  [|9;2;5;7;4;3;1;6;9|];
+  [|4;3;8;6;1;5;9;2;7|];
+  [|3;5;7;4;6;1;2;8;9|];
+  [|8;9;4;3;7;2;6;1;5|];
+  [|2;1;6;5;8;9;3;7;4|];
+  [|6;8;9;1;5;4;7;3;2|];
+  [|1;4;2;8;3;7;5;9;6|];
+  [|5;7;3;2;9;6;8;4;1|]
+|]
+*)

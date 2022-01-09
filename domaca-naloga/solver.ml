@@ -16,16 +16,16 @@ type response = Solved of Model.solution | Unsolved of state | Fail of state
 (*tip rešitev*)
 
 (*DODANE FUNKCIJE*)
-let change_none_to_zero = function
+let int_option_to_ind = function
   |Some x -> x
   |None -> 0
 
 let map_list array  = 
-  let rec map_array_aux f list = match list with
-  | [] -> []
-  | x::xs -> (f x) :: map_array_aux f xs
+  let rec map_array_aux f list acc = match list with
+  | [] -> acc
+  | x::xs -> map_array_aux f xs ((f x)::acc)
 in
-  map_array_aux change_none_to_zero (Array.to_list array)
+  map_array_aux int_option_to_ind (Array.to_list array) []
 
 
 let odstevanje_listov list1 list2 = 
@@ -39,10 +39,6 @@ in
 let rec list_without_zero list = match list with
   | [] -> []
   | x::xs -> if (x = 0) then list_without_zero xs else x :: (list_without_zero xs)
-
-let int_option_to_int x = match x with
-  |Some y -> y
-  |_ -> failwith "None"
 
 
 (*dobila bom vsa št ki manjkajo v nekem arrayu, pospravljena v int listu*)
@@ -78,14 +74,18 @@ let urejeni_available_listi (list : available list) =
     List.sort lenght list
 
   (*dobili bomo list "parov" urejenih možnosti na nekem indeksu; za hitrejše delovanje jih sortiramo po dolžini*)
-let vse_moznosti grid =
-  let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
-    |None -> if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
-      if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
-    |Some x-> if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
-      if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
-  in 
-  urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
+  let vse_moznosti grid =
+    let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
+      |None -> if (i,j) = (8,8) then ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) 
+        else 
+          if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
+          if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
+      |Some x-> if (i,j) = (8,8) then acc 
+        else 
+          if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
+          if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
+    in 
+    urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
 
 let validate_state (state : state) : response =
   let unsolved =
