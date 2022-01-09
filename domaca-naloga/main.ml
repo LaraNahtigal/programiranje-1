@@ -6,7 +6,7 @@ let read_problem filename =
 
 let find_solution problem =
   let before = Sys.time () in
-  let solution = Model.solve_problem problem in
+  let solution = Solver.solve_problem problem in
   let after = Sys.time () in
   let elapsed_time = after -. before in
   (solution, elapsed_time)
@@ -42,7 +42,7 @@ let () =
 (* Če domačo nalogo rešujete prek spletnega vmesnika, ki ne podpira branja datotek,
    lahko delovanje preizkušate prek spodnjega programa. *)
 
-(* let () = "
+(*let () = "
 ┏━━━┯━━━┯━━━┓
 ┃483│921│657┃
 ┃967│3 5│821┃
@@ -57,4 +57,5 @@ let () =
 ┃695│417│382┃
 ┗━━━┷━━━┷━━━┛"
   |> Model.problem_of_string
-  |> find_and_display_solution *)
+  |> find_and_display_solution 
+*)

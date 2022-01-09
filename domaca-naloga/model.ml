@@ -21,9 +21,6 @@ let string_of_list string_of_element sep lst =
   lst |> List.map string_of_element |> String.concat sep
 (*vrne nek string v katerem so med elementi lista vrinjeni stringi, npr, "1a2a3a4"*)
 
-(*za razumevanje, f lahko vstavim namesto string_of_element*)  
-let f n =
-  n |> string_of_int
 
 let string_of_nested_list string_of_element inner_sep outer_sep =
   string_of_list (string_of_list string_of_element inner_sep) outer_sep
@@ -37,6 +34,7 @@ let string_of_row string_of_cell row =
     |> string_of_nested_list string_of_cell "" "│"
   in
   "┃" ^ string_of_cells ^ "┃\n"
+
 
 (*string_of_row f [|1;2;3;4;5;6;7;8;9|];;
 - : string = "┃123│456│789┃\n"*)
@@ -112,19 +110,18 @@ let grid_of_string cell_of_char str =
   if Array.exists (fun x -> x <> 9) (Array.map Array.length grid) then
     failwith "Nepravilno število stolpcev";
   grid
-
+  
 (* Model za vhodne probleme *)
 
 type problem = { initial_grid : int option grid }
 
 (*naš problem(sudoku) želimo z znanimi funkcijami zapisati v obliki grida, potrebujemo pomožno funkcijo 
 da int spremenimo v string in pustimo prazen kvadratek, če int-a ni*)
-let option_of_string a = match a with
-  | None -> ""
-  | Some st -> string_of_int st
-
+let int_option_to_string = function
+  |Some x -> string_of_int x
+  |None -> " "
 let print_problem (problem:problem) : unit = 
-  print_grid option_of_string problem.initial_grid
+  print_grid int_option_to_string problem.initial_grid
 
 let problem_of_string str =
   let cell_of_char = function
@@ -157,14 +154,14 @@ let all_digit (array : 'a array) =
 
 let int_option_to_int x = match x with
   |Some y -> y
-  |_ -> failwith "None"
+  |None -> 0
 
 (*funkcija pogleda če je problem res neka podmnožica rešitve*)
 let problem_is_solution (problem:problem) (solution:int array array) = 
   let rec problem_is_solution_aux problem solution (i,j) = match (i,j) with 
-    |(8,8) -> if int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j) then true else false
-    |(8,_) -> if int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j) then true else false && (problem_is_solution_aux problem solution (0,(j+1)))
-    |(i,_) -> if int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j) then true else false && (problem_is_solution_aux problem solution ((i+1),j))
+    |(8,8) -> if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false
+    |(8,_) -> if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false && (problem_is_solution_aux problem solution (0,(j+1)))
+    |(i,_) -> if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false && (problem_is_solution_aux problem solution ((i+1),j))
 in
 problem_is_solution_aux problem solution (0,0)
        
@@ -182,7 +179,7 @@ let is_valid_solution (problem:problem) solution =
 
 
 (*################################################################SOLVER##############################################################################*)
-
+(*
 type available = { loc : int * int; possible : int list }
 (*tip možnosti*)
 
@@ -372,9 +369,10 @@ and explore_state (state : state) =
 let solve_problem (problem : problem) =
   problem |> initialize_state |> solve_state
 
-
+*)
 
 (*##################################################################KRNEKEJ###################################################################################################*)
+
 let primer2_neresen = [|
 [|Some 2 ; None ; None ; None ; Some 8 ; None ; Some 3 ; None ;  None |];
 [|None ; Some 6 ; None ; None ; Some 7; None ; None ; Some 8 ; Some 4 |];
@@ -386,12 +384,12 @@ let primer2_neresen = [|
 [|Some 7 ; Some 2 ; None ; None ; Some 4 ; None ; None ; Some 6 ;None |];
 [|None ; None ; Some 4 ; None ; Some 1 ; None ; None ; None ;Some 3 |]|]
 let primer2_problem = {initial_grid = primer2_neresen}
-
+(*
 let primer2_state = {
   problem = primer2_problem;
   current_grid = primer2_neresen;
   moznosti = vse_moznosti primer2_neresen
-}
+}*)
 let primer1_neresen_int = 
   [|
     [| 4; 8; 3; 9; 2; 1; 6; 5; 7|];
@@ -441,6 +439,6 @@ let primer1_neresen = [|
 [|Some 3; Some 7; Some 2; Some 6; Some 8; Some 9; Some 5; Some 1;Some 4|];
 [|Some 8; Some 1; Some 4; Some 2; Some 5; Some 3; Some 7; Some 6;Some 9|];
 [|Some 6; Some 9; Some 5; Some 4; Some 1; Some 7; Some 3; Some 8;Some 2|]|]   let primer_1_problem = {initial_grid = primer1_neresen}
-  let primer_1_state = {problem = primer_1_problem; current_grid = primer1_neresen; moznosti = vse_moznosti primer1_neresen}
+ 
 
 

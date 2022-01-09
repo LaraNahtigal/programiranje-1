@@ -87,11 +87,25 @@ let vse_moznosti grid =
   in 
   urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
 
+let validate_state (state : state) : response =
+  let unsolved =
+    Array.exists (Array.exists Option.is_none) state.current_grid
+  in
+  if unsolved then Unsolved state
+  else
+    (* Option.get ne bo sprožil izjeme, ker so vse vrednosti v mreži oblike Some x *)
+    let solution = Model.map_grid Option.get state.current_grid in
+    if Model.is_valid_solution state.problem solution then Solved solution
+    else Fail state
+
+
 let eno_vrednost grid x (i, j) = 
-  grid.(i).(j) <- Some x;
-  grid
+  let model_grid = Model.copy_grid grid in 
+    model_grid.(i).(j) <- Some x;
+      model_grid
 
 (*funkcija bo rešila le celice kjer je natanko ena možnost*)
+
 let resimo_enostavne (state : state) = 
   let trenuten_grid = Model.copy_grid state.current_grid in 
   let moznosti = (vse_moznosti trenuten_grid) in
@@ -107,7 +121,6 @@ in
   (*napisimo sedaj novo stanje*)
   {current_grid = novejsi_grid ; moznosti = (vse_moznosti novejsi_grid); problem = state.problem}
 
-  
 let initialize_state (problem : Model.problem) : state =
   { current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem } 
  
@@ -118,18 +131,6 @@ let nov_state (state : state) =
         else ponavljamo_dokler_resuje f (f stanje)
       in
       (ponavljamo_dokler_resuje resimo_enostavne state)
-
-
-let validate_state (state : state) : response =
-  let unsolved =
-    Array.exists (Array.exists Option.is_none) state.current_grid
-  in
-  if unsolved then Unsolved state
-  else
-    (* Option.get ne bo sprožil izjeme, ker so vse vrednosti v mreži oblike Some x *)
-    let solution = Model.map_grid Option.get state.current_grid in
-    if Model.is_valid_solution state.problem solution then Solved solution
-    else Fail state
 
 
 let branch_state (state : state) : (state * state) option =
