@@ -182,7 +182,7 @@ let is_valid_solution (problem:problem) solution =
 
 
 (*################################################################SOLVER##############################################################################*)
-
+(*
 type available = { loc : int * int; possible : int list }
 (*tip možnosti*)
 
@@ -443,4 +443,4 @@ let primer1_neresen = [|
 [|Some 6; Some 9; Some 5; Some 4; Some 1; Some 7; Some 3; Some 8;Some 2|]|]   let primer_1_problem = {initial_grid = primer1_neresen}
   let primer_1_state = {problem = primer_1_problem; current_grid = primer1_neresen; moznosti = vse_moznosti primer1_neresen}
 
-
+*)

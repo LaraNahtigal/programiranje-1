@@ -91,10 +91,6 @@ let eno_vrednost grid x (i, j) =
   grid.(i).(j) <- Some x;
   grid
 
-let initialize_state (problem : Model.problem) : state =
-  { current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem }
-
-
 (*funkcija bo rešila le celice kjer je natanko ena možnost*)
 let resimo_enostavne (state : state) = 
   let trenuten_grid = Model.copy_grid state.current_grid in 
@@ -110,7 +106,10 @@ in
   let novejsi_grid = aux moznosti trenuten_grid in
   (*napisimo sedaj novo stanje*)
   {current_grid = novejsi_grid ; moznosti = (vse_moznosti novejsi_grid); problem = state.problem}
- 
+
+  
+let initialize_state (problem : Model.problem) : state =
+  { current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem } 
  
 (*funkcijo ki resuje enostavne uporabimo tolikokrat da ne rši več nobene celice*)
 let nov_state (state : state) = 

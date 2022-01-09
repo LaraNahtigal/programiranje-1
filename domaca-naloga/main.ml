@@ -6,7 +6,7 @@ let read_problem filename =
 
 let find_solution problem =
   let before = Sys.time () in
-  let solution = Model.solve_problem problem in
+  let solution = Solver.solve_problem problem in
   let after = Sys.time () in
   let elapsed_time = after -. before in
   (solution, elapsed_time)
