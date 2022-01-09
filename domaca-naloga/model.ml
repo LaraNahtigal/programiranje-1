@@ -123,8 +123,8 @@ let option_of_string a = match a with
   | None -> ""
   | Some st -> string_of_int st
 
-let print_problem problem : unit = 
-  print_grid option_of_string problem
+let print_problem (problem:problem) : unit = 
+  print_grid option_of_string problem.initial_grid
 
 let problem_of_string str =
   let cell_of_char = function
@@ -182,7 +182,7 @@ let is_valid_solution (problem:problem) solution =
 
 
 (*################################################################SOLVER##############################################################################*)
-
+(*
 type available = { loc : int * int; possible : int list }
 (*tip možnosti*)
 
@@ -443,4 +443,4 @@ let primer1_neresen = [|
 [|Some 6; Some 9; Some 5; Some 4; Some 1; Some 7; Some 3; Some 8;Some 2|]|]   let primer_1_problem = {initial_grid = primer1_neresen}
   let primer_1_state = {problem = primer_1_problem; current_grid = primer1_neresen; moznosti = vse_moznosti primer1_neresen}
 
-
+*)

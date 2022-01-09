@@ -77,6 +77,7 @@ let urejeni_available_listi (list : available list) =
   let lenght x y = List.length x.possible - List.length y.possible in 
     List.sort lenght list
 
+  (*dobili bomo list "parov" urejenih možnosti na nekem indeksu; za hitrejše delovanje jih sortiramo po dolžini*)
 let vse_moznosti grid =
   let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
     |None -> if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
@@ -90,6 +91,11 @@ let eno_vrednost grid x (i, j) =
   grid.(i).(j) <- Some x;
   grid
 
+let initialize_state (problem : Model.problem) : state =
+  { current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem }
+
+
+(*funkcija bo rešila le celice kjer je natanko ena možnost*)
 let resimo_enostavne (state : state) = 
   let trenuten_grid = Model.copy_grid state.current_grid in 
   let moznosti = (vse_moznosti trenuten_grid) in
@@ -106,9 +112,7 @@ in
   {current_grid = novejsi_grid ; moznosti = (vse_moznosti novejsi_grid); problem = state.problem}
  
  
-let initialize_state (problem : Model.problem) : state =
-  { current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem }
-
+(*funkcijo ki resuje enostavne uporabimo tolikokrat da ne rši več nobene celice*)
 let nov_state (state : state) = 
       let rec ponavljamo_dokler_resuje f stanje = 
         if ((f stanje).current_grid = stanje.current_grid) then stanje
