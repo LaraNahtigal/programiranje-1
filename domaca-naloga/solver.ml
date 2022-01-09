@@ -47,26 +47,26 @@ let manjkajoca_st array = match (List.sort compare (map_list array)) with
   | _ -> odstevanje_listov [1; 2; 3; 4; 5; 6; 7; 8; 9] (list_without_zero(map_list array))
 
 
-  let presek_listov list1 list2 =
-    let rec presek_listov_aux l1 l2 acc = match l1 with
-      | [] -> acc
-      | x::xs when (List.mem x l2) -> presek_listov_aux xs l2 (x::acc)
-      | x::xs -> presek_listov_aux xs l2 acc
-  in
-    presek_listov_aux list1 list2 []
-  
-  
-  let vse_moznosti_na_gridu grid (i, j) = match (i, j) with
-    | (0, 0) | (0, 1) | (0, 2) | (1, 0) | (1, 1) | (1, 2) | (2, 0) | (2, 1) | (2, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 0))) 
-    | (0, 3) | (0, 4) | (0, 5) | (1, 3) | (1, 4) | (1, 5) | (2, 3) | (2, 4) | (2, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 1))) 
-    | (0, 6) | (0, 7) | (0, 8) | (1, 6) | (1, 7) | (1, 8) | (2, 6) | (2, 7) | (2, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 2))) 
-    | (3, 0) | (3, 1) | (3, 2) | (4, 0) | (4, 1) | (4, 2) | (5, 0) | (5, 1) | (5, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 3))) 
-    | (3, 3) | (3, 4) | (3, 5) | (4, 3) | (4, 4) | (4, 5) | (5, 3) | (5, 4) | (5, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 4))) 
-    | (3, 6) | (3, 7) | (3, 8) | (4, 6) | (4, 7) | (4, 8) | (5, 6) | (5, 7) | (5, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 5))) 
-    | (6, 0) | (6, 1) | (6, 2) | (7, 0) | (7, 1) | (7, 2) | (8, 0) | (8, 1) | (8, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 6))) 
-    | (6, 3) | (6, 4) | (6, 5) | (7, 3) | (7, 4) | (7, 5) | (8, 3) | (8, 4) | (8, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 7))) 
-    | (6, 6) | (6, 7) | (6, 8) | (7, 6) | (7, 7) | (7, 8) | (8, 6) | (8, 7) | (8, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 8))) 
-    | _ -> failwith "ta par ne obstaja"
+let presek_listov list1 list2 =
+  let rec presek_listov_aux l1 l2 acc = match l1 with
+    | [] -> acc
+    | x::xs when (List.mem x l2) -> presek_listov_aux xs l2 (x::acc)
+    | x::xs -> presek_listov_aux xs l2 acc
+in
+  presek_listov_aux list1 list2 []
+
+
+let vse_moznosti_na_gridu grid (i, j) = match (i, j) with
+  | (0, 0) | (0, 1) | (0, 2) | (1, 0) | (1, 1) | (1, 2) | (2, 0) | (2, 1) | (2, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 0))) 
+  | (0, 3) | (0, 4) | (0, 5) | (1, 3) | (1, 4) | (1, 5) | (2, 3) | (2, 4) | (2, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 1))) 
+  | (0, 6) | (0, 7) | (0, 8) | (1, 6) | (1, 7) | (1, 8) | (2, 6) | (2, 7) | (2, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 2))) 
+  | (3, 0) | (3, 1) | (3, 2) | (4, 0) | (4, 1) | (4, 2) | (5, 0) | (5, 1) | (5, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 3))) 
+  | (3, 3) | (3, 4) | (3, 5) | (4, 3) | (4, 4) | (4, 5) | (5, 3) | (5, 4) | (5, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 4))) 
+  | (3, 6) | (3, 7) | (3, 8) | (4, 6) | (4, 7) | (4, 8) | (5, 6) | (5, 7) | (5, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 5))) 
+  | (6, 0) | (6, 1) | (6, 2) | (7, 0) | (7, 1) | (7, 2) | (8, 0) | (8, 1) | (8, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 6))) 
+  | (6, 3) | (6, 4) | (6, 5) | (7, 3) | (7, 4) | (7, 5) | (8, 3) | (8, 4) | (8, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 7))) 
+  | (6, 6) | (6, 7) | (6, 8) | (7, 6) | (7, 7) | (7, 8) | (8, 6) | (8, 7) | (8, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 8))) 
+  | _ -> failwith "ta par ne obstaja"
 
 
 let urejeni_available_listi (list : available list) =
@@ -74,19 +74,19 @@ let urejeni_available_listi (list : available list) =
     List.sort lenght list
 
   (*dobili bomo list "parov" urejenih možnosti na nekem indeksu; za hitrejše delovanje jih sortiramo po dolžini*)
-  let vse_moznosti grid =
-    let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
-      |None -> if (i,j) = (8,8) then ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) 
-        else 
-          if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
-          if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
-      |Some x-> if (i,j) = (8,8) then acc 
-        else 
-          if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
-          if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
-    in 
-    urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
-
+let vse_moznosti grid =
+  let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
+    |None -> if (i,j) = (8,8) then ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) 
+      else 
+        if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
+        if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
+    |Some x-> if (i,j) = (8,8) then acc 
+      else 
+        if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
+        if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
+  in 
+  urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
+  
 let validate_state (state : state) : response =
   let unsolved =
     Array.exists (Array.exists Option.is_none) state.current_grid
