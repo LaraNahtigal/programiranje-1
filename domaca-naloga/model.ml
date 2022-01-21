@@ -55,7 +55,6 @@ let print_grid string_of_cell grid =
 (* Funkcije za dostopanje do elementov mreže *)
 
 
-(*[|[|1;2;3;4;5;6;7;8;9|]; [|3;4;5;6;7;8;9;1;2|];[|9;1;2;3;4;5;6;7;8|];[|4;5;6;7;8;9;1;2;3|];[|5;6;7;8;9;1;2;3;4|];[|8;9;1;2;3;4;5;6;7|];[|7;8;9;1;2;3;4;5;6|];[|3;4;5;6;7;8;9;1;2|];[|3;4;5;6;7;8;9;1;2|]|];;*)
 let get_row (grid : 'a grid) (row_ind : int) = 
   grid.(row_ind)
 
@@ -138,8 +137,6 @@ type solution = int grid
 
 let print_solution solution = print_grid string_of_int solution
 
-
-(*funkcija da preverimo če vsebuje vsak array vsa st od 1 do 9*) 
 let odstevanje_listov list1 list2 = 
   let rec odstevanje_listov_aux l1 l2 acc = match l1 with
   | [] -> acc
@@ -147,11 +144,11 @@ let odstevanje_listov list1 list2 =
   | x::xs -> (odstevanje_listov_aux xs l2 (x::acc)) 
 in
   odstevanje_listov_aux list1 list2 []
-
+  
+(*funkcija da preverimo če vsebuje vsak array vsa st od 1 do 9*) 
 let all_digit (array : 'a array) =
   let list =  (Array.to_list array) in
   if odstevanje_listov list [1; 2; 3; 4; 5; 6; 7; 8; 9] = [] then true else false
-
 
 let int_option_to_int x = match x with
   |Some y -> y
@@ -160,22 +157,60 @@ let int_option_to_int x = match x with
 (*funkcija pogleda če je problem res neka podmnožica rešitve*)
 let problem_is_solution (problem:problem) (solution:int array array) = 
   let rec problem_is_solution_aux problem solution (i,j) = match (i,j) with 
-    |(8,8) -> if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false
-    |(8,_) -> if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false && (problem_is_solution_aux problem solution (0,(j+1)))
-    |(i,_) -> if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false && (problem_is_solution_aux problem solution ((i+1),j))
+    |(8,8) -> 
+      if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true else false
+    |(8,_) -> 
+      if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true 
+      else false && (problem_is_solution_aux problem solution (0,(j+1)))
+    |(i,_) -> 
+      if (problem.initial_grid.(i).(j) = None || (int_option_to_int(problem.initial_grid.(i).(j)) = solution.(i).(j))) then true 
+      else false && (problem_is_solution_aux problem solution ((i+1),j))
 in
 problem_is_solution_aux problem solution (0,0)
        
-
-
 (*problem, rows solution so list array, potrebujem pomožno fun*)
 let rec all_digit_array_list array_list  = match array_list with
     | [] -> true
     | x :: xs -> if all_digit x then all_digit_array_list xs else false
    
-
 let is_valid_solution (problem:problem) solution = 
   all_digit_array_list(rows solution) && all_digit_array_list(columns solution) && all_digit_array_list(boxes solution) && (problem_is_solution problem solution)
 
 
 
+(*
+let t =   
+[|
+[|Some 2; None; None; None; Some 8; None; Some 3; None; None|];
+[|None; Some 6; None; None; Some 7; None; None; Some 8; Some 4|];
+[|None; Some 3; None; Some 5; Some 6; None; Some 2; None; Some 9|];
+[|None; None; None; Some 1; None; Some 5; Some 4; None; Some 8|];
+[|None; None; None; None; None; None; None; None; None|];
+[|Some 4; None; Some 2; Some 7; None; Some 6; None; None; None|];
+[|Some 3; None; Some 1; None; None; Some 7; None; Some 4; None|];
+[|Some 7; Some 2; None; None; Some 4; None; None; Some 6; Some 1|];
+[|None; None; Some 4; None; Some 1; None; None; None; Some 3|]|]
+
+let primer = 
+
+[|
+  [|Some 2; None; None; None; Some 8; None; Some 3; None; None|];
+  [|None; Some 6; None; None; Some 7; None; None; Some 8; Some 4|];
+  [|None; Some 3; None; Some 5; None; None; Some 2; None; Some 9|];
+  [|None; None; None; Some 1; None; Some 5; Some 4; None; Some 8|];
+  [|None; None; None; None; None; None; None; None; None|];
+  [|Some 4; None; Some 2; Some 7; None; Some 6; None; None; None|];
+  [|Some 3; None; Some 1; None; None; Some 7; None; Some 4; None|];
+  [|Some 7; Some 2; None; None; Some 4; None; None; Some 6; None|];
+  [|None; None; Some 4; None; Some 1; None; None; None; Some 3|];
+|]
+
+let primer_problem = {initial_grid = primer}
+
+let (primer_state : state) = {
+problem = primer_problem;
+current_grid = t;
+moznosti = vse_moznosti primer
+}
+
+*)

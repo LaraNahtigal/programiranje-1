@@ -16,36 +16,21 @@ type response = Solved of Model.solution | Unsolved of state | Fail of state
 (*tip rešitev*)
 
 (*DODANE FUNKCIJE*)
-let int_option_to_ind = function
-  |Some x -> x
-  |None -> 0
-
 let map_list array  = 
   let rec map_array_aux f list acc = match list with
   | [] -> acc
   | x::xs -> map_array_aux f xs ((f x)::acc)
 in
-  map_array_aux int_option_to_ind (Array.to_list array) []
-
-
-let odstevanje_listov list1 list2 = 
-  let rec odstevanje_listov_aux l1 l2 acc = match l1 with
-  | [] -> acc
-  | x::xs when (List.mem x l2) -> (odstevanje_listov_aux xs l2 acc)
-  | x::xs -> (odstevanje_listov_aux xs l2 (x::acc)) 
-in
-  odstevanje_listov_aux list1 list2 []
+  map_array_aux Model.int_option_to_int (Array.to_list array) []
 
 let rec list_without_zero list = match list with
   | [] -> []
   | x::xs -> if (x = 0) then list_without_zero xs else x :: (list_without_zero xs)
 
-
 (*dobila bom vsa št ki manjkajo v nekem arrayu, pospravljena v int listu*)
 let manjkajoca_st array = match (List.sort compare (map_list array)) with
   | [1; 2; 3; 4; 5; 6; 7; 8; 9] -> []
-  | _ -> odstevanje_listov [1; 2; 3; 4; 5; 6; 7; 8; 9] (list_without_zero(map_list array))
-
+  | _ -> Model.odstevanje_listov [1; 2; 3; 4; 5; 6; 7; 8; 9] (list_without_zero(map_list array))
 
 let presek_listov list1 list2 =
   let rec presek_listov_aux l1 l2 acc = match l1 with
@@ -55,20 +40,26 @@ let presek_listov list1 list2 =
 in
   presek_listov_aux list1 list2 []
 
-
-let vse_moznosti_na_gridu grid (i, j) = match (i, j) with
-  | (0, 0) | (0, 1) | (0, 2) | (1, 0) | (1, 1) | (1, 2) | (2, 0) | (2, 1) | (2, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 0))) 
-  | (0, 3) | (0, 4) | (0, 5) | (1, 3) | (1, 4) | (1, 5) | (2, 3) | (2, 4) | (2, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 1))) 
-  | (0, 6) | (0, 7) | (0, 8) | (1, 6) | (1, 7) | (1, 8) | (2, 6) | (2, 7) | (2, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 2))) 
-  | (3, 0) | (3, 1) | (3, 2) | (4, 0) | (4, 1) | (4, 2) | (5, 0) | (5, 1) | (5, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 3))) 
-  | (3, 3) | (3, 4) | (3, 5) | (4, 3) | (4, 4) | (4, 5) | (5, 3) | (5, 4) | (5, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 4))) 
-  | (3, 6) | (3, 7) | (3, 8) | (4, 6) | (4, 7) | (4, 8) | (5, 6) | (5, 7) | (5, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 5))) 
-  | (6, 0) | (6, 1) | (6, 2) | (7, 0) | (7, 1) | (7, 2) | (8, 0) | (8, 1) | (8, 2) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 6))) 
-  | (6, 3) | (6, 4) | (6, 5) | (7, 3) | (7, 4) | (7, 5) | (8, 3) | (8, 4) | (8, 5) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 7))) 
-  | (6, 6) | (6, 7) | (6, 8) | (7, 6) | (7, 7) | (7, 8) | (8, 6) | (8, 7) | (8, 8) ->  (presek_listov (presek_listov(manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid 8))) 
+let indeks_boxa grid (i, j) = match (i, j) with
+  | (0, 0) | (0, 1) | (0, 2) | (1, 0) | (1, 1) | (1, 2) | (2, 0) | (2, 1) | (2, 2) -> 0 
+  | (0, 3) | (0, 4) | (0, 5) | (1, 3) | (1, 4) | (1, 5) | (2, 3) | (2, 4) | (2, 5) -> 1
+  | (0, 6) | (0, 7) | (0, 8) | (1, 6) | (1, 7) | (1, 8) | (2, 6) | (2, 7) | (2, 8) -> 2 
+  | (3, 0) | (3, 1) | (3, 2) | (4, 0) | (4, 1) | (4, 2) | (5, 0) | (5, 1) | (5, 2) -> 3 
+  | (3, 3) | (3, 4) | (3, 5) | (4, 3) | (4, 4) | (4, 5) | (5, 3) | (5, 4) | (5, 5) -> 4 
+  | (3, 6) | (3, 7) | (3, 8) | (4, 6) | (4, 7) | (4, 8) | (5, 6) | (5, 7) | (5, 8) -> 5 
+  | (6, 0) | (6, 1) | (6, 2) | (7, 0) | (7, 1) | (7, 2) | (8, 0) | (8, 1) | (8, 2) -> 6 
+  | (6, 3) | (6, 4) | (6, 5) | (7, 3) | (7, 4) | (7, 5) | (8, 3) | (8, 4) | (8, 5) -> 7 
+  | (6, 6) | (6, 7) | (6, 8) | (7, 6) | (7, 7) | (7, 8) | (8, 6) | (8, 7) | (8, 8) -> 8 
   | _ -> failwith "ta par ne obstaja"
 
-
+let moznosti_v_celici grid (i,j) = 
+  let k = indeks_boxa grid (i,j) in 
+  (presek_listov    
+    (presek_listov
+      (manjkajoca_st (Model.get_row grid i)) (manjkajoca_st (Model.get_column grid j))) (manjkajoca_st (Model.get_box grid k)
+    )
+  ) 
+ 
 let urejeni_available_listi (list : available list) =
   let lenght x y = List.length x.possible - List.length y.possible in 
     List.sort lenght list
@@ -76,17 +67,20 @@ let urejeni_available_listi (list : available list) =
   (*dobili bomo list "parov" urejenih možnosti na nekem indeksu; za hitrejše delovanje jih sortiramo po dolžini*)
 let vse_moznosti grid =
   let rec vse_moznosti_aux grid i j acc = match grid.(i).(j) with
-    |None -> if (i,j) = (8,8) then ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) 
+    |None -> if (i,j) = (8,8) then ({loc = (i,j); possible = moznosti_v_celici grid (i,j)} :: acc) 
       else 
-        if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else 
-        if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = vse_moznosti_na_gridu grid (i,j)} :: acc) else acc
+        if j < 8 then vse_moznosti_aux grid i (j + 1) ({loc = (i,j); possible = moznosti_v_celici grid (i,j)} :: acc) else 
+        if i < 8 then vse_moznosti_aux grid (i + 1) 0 ({loc = (i,j); possible = moznosti_v_celici grid (i,j)} :: acc) else acc
     |Some x-> if (i,j) = (8,8) then acc 
       else 
         if j < 8 then vse_moznosti_aux grid i (j + 1) acc else 
         if i < 8 then vse_moznosti_aux grid (i + 1) 0 acc else acc
   in 
   urejeni_available_listi(vse_moznosti_aux grid 0 0 [])
-  
+
+let initialize_state (problem : Model.problem) : state =
+  {current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem}   
+
 let validate_state (state : state) : response =
   let unsolved =
     Array.exists (Array.exists Option.is_none) state.current_grid
@@ -98,40 +92,35 @@ let validate_state (state : state) : response =
     if Model.is_valid_solution state.problem solution then Solved solution
     else Fail state
 
-
-let eno_vrednost grid x (i, j) = 
+let resi_celico grid x (i, j) = 
   let model_grid = Model.copy_grid grid in 
     model_grid.(i).(j) <- Some x;
       model_grid
 
 (*funkcija bo rešila le celice kjer je natanko ena možnost*)
-
 let resimo_enostavne (state : state) = 
   let trenuten_grid = Model.copy_grid state.current_grid in 
   let moznosti = (vse_moznosti trenuten_grid) in
     let rec aux moznosti acc = match moznosti with
       |[] -> acc
-      |x::xs ->
+      |x::xs -> 
         match x.possible with 
         |[y] -> let (i,j) = x.loc in 
-          aux xs (eno_vrednost acc y (i, j)) 
+          aux xs (resi_celico acc y (i, j)) 
         |_-> aux xs acc
 in
   let novejsi_grid = aux moznosti trenuten_grid in
   (*napisimo sedaj novo stanje*)
   {current_grid = novejsi_grid ; moznosti = (vse_moznosti novejsi_grid); problem = state.problem}
 
-let initialize_state (problem : Model.problem) : state =
-  { current_grid = Model.copy_grid problem.initial_grid; moznosti = (vse_moznosti problem.initial_grid ); problem = problem } 
  
-(*funkcijo ki resuje enostavne uporabimo tolikokrat da ne rši več nobene celice*)
+(*funkcijo ki resuje enostavne uporabimo tolikokrat da ne reši več nobene celice*)
 let nov_state (state : state) = 
       let rec ponavljamo_dokler_resuje f stanje = 
         if ((f stanje).current_grid = stanje.current_grid) then stanje
         else ponavljamo_dokler_resuje f (f stanje)
       in
       (ponavljamo_dokler_resuje resimo_enostavne state)
-
 
 let branch_state (state : state) : (state * state) option =
   (* TODO: Pripravite funkcijo, ki v trenutnem stanju poišče hipotezo, glede katere
@@ -146,8 +135,8 @@ let branch_state (state : state) : (state * state) option =
     |[] -> None 
     |y::ys -> 
       let (i,j) = x.loc in
-      let nov_grid = (eno_vrednost state.current_grid y x.loc ) in
-        Some ({problem = state.problem;
+      let nov_grid = (resi_celico state.current_grid y x.loc ) in
+        Some (nov_state {problem = state.problem;
           current_grid = nov_grid;
           moznosti = vse_moznosti nov_grid},
 
@@ -156,7 +145,6 @@ let branch_state (state : state) : (state * state) option =
           moznosti = {possible = ys; loc = (i,j)} :: xs}
           ))
     
-
 (* pogledamo, če trenutno stanje vodi do rešitve *)
 let rec solve_state (state : state) =
   (* uveljavimo trenutne omejitve in pogledamo, kam smo prišli *)
@@ -190,3 +178,4 @@ and explore_state (state : state) =
 
 let solve_problem (problem : Model.problem) =
   problem |> initialize_state |> solve_state
+
